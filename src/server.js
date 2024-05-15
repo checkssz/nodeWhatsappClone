@@ -6,27 +6,30 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
-const port = process.env.port || 4000;
+const port = process.env.PORT || 4000;
 
-//on -> escutando - receptor
-//emit -> enviando algm dado
+// on -> escutando - receptor
+// emit -> enviando algum dado
+
 const users = [];
 
-io.on('connection', (socket)=>{
-    socket.on("disconnect", ()=>{
+io.on("connection", (socket) => {
+  socket.on("disconnect", () => {
+    console.log('Um usuário saiu do chat');
+  })
 
-    })
-    
-    socket.on("join", (name)=>{
-        const user = {id: socket.id, name};
-        users.push(user)
-        io.emit("message", {name: null, message: `${name} entrou no chat `})
-        io.emit("users", users)
-    })
 
-    socket.on("message", (message)=>{
-        io.emit("message", message);
-    })
+  socket.on("join", (userName) => {
+    const user = { id: socket.id, userName};
+    users.push(user);
+    io.emit("users", users);
+  })
+
+  socket.on("message", (message) => {
+    message.userID = socket.id;
+    io.emit("message", message);
+  })
+
 })
 
-server.listen(port, () => console.log(`O servidor está rodando na porta ${port}`))
+server.listen(port, () => console.log(`servidor rodando na porta ${port}`));
